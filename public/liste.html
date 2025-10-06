@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>HelpDesk Lite - Liste Tickets</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <header>
+        <h1>Liste des tickets</h1>
+    </header>
+
+    <div class="container">
+        <input type="text" id="search" placeholder="Rechercher par titre ou description">
+        <select id="filterStatus">
+            <option value="">Filtrer par statut</option>
+            <option value="ouvert">Ouvert</option>
+            <option value="en cours">En cours</option>
+            <option value="fermé">Fermé</option>
+        </select>
+        <select id="filterPriority">
+            <option value="">Filtrer par priorité</option>
+            <option value="haute">Haute</option>
+            <option value="moyenne">Moyenne</option>
+            <option value="basse">Basse</option>
+        </select>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Titre</th>
+                    <th>Description</th>
+                    <th>Demandeur</th>
+                    <th>Priorité</th>
+                    <th>Statut</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="ticketTable"></tbody>
+        </table>
+    </div>
+
+    <script>
+        const table = document.getElementById("ticketTable");
+
+        async function loadTickets() {
+            const res = await fetch("/api/tickets");
+            let tickets = await res.json();
+
+            const statusFilter = document.getElementById("filterStatus").value;
+            const priorityFilter = document.getElementById("filterPriority").value;
+            const searchValue = document.getElementById("search").value.toLowerCase();
+
+            if (statusFilter) tickets = tickets.filter(t => t.statut === statusFilter);
+            if (priorityFilter) tickets = tickets.filter(t => t.priority === priorityFilter);
+            if (searchValue) tickets = tickets.filter(t =>
+                t.title.toLowerCase().includes(searchValue) ||
+                t.description.toLowerCase().includes(searchValue)
+            );
+
+            table.innerHTML = "";
+            tickets.forEach(t => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+            <td>${t.title}</td>
+            <td>${t.description}</td>
+            <td>${t.requester}</td>
+            <td>${t.priority}</td>
+            <td>
+                <select onchange="updateStatus(${t.id}, this.value)">
+                    <option value="ouvert" ${t.statut === "ouvert" ? "selected" : ""}>Ouvert</option>
+                    <option value="en cours" ${t.statut === "en cours" ? "selected" : ""}>En cours</option>
+                    <option value="fermé" ${t.statut === "fermé" ? "selected" : ""}>Fermé</option>
+                </select>
+            </td>
+            <td><button onclick="deleteTicket(${t.id})">Supprimer</button></td>
+        `;
+                table.appendChild(tr);
+            });
+        }
+
+        async function updateStatus(id, statut) {
+            await fetch(`/api/tickets/${id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ statut })
+            });
+            loadTickets();
+        }
+
+        async function deleteTicket(id) {
+            if (!confirm("Voulez-vous vraiment supprimer ce ticket ?")) return;
+            await fetch(`/api/DeleteTickets/${id}`, { method: "DELETE" });
+            loadTickets();
+        }
+
+        document.getElementById("filterStatus").addEventListener("change", loadTickets);
+        document.getElementById("filterPriority").addEventListener("change", loadTickets);
+        document.getElementById("search").addEventListener("input", loadTickets);
+
+        loadTickets();
+    </script>
+</body>
+
+</html>

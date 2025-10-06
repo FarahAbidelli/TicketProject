@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>HelpDesk Lite - Ajouter Ticket</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <header>
+        <h1>HelpDesk Lite - Créer un ticket</h1>
+    </header>
+
+    <div class="container">
+        <form id="ticketForm">
+            <input type="text" id="title" placeholder="Titre" required>
+            <input type="text" id="description" placeholder="Description" required>
+            <input type="text" id="requester" placeholder="Demandeur" required>
+            <select id="priority" required>
+                <option value="">Priorité</option>
+                <option value="haute">Haute</option>
+                <option value="moyenne">Moyenne</option>
+                <option value="basse">Basse</option>
+            </select>
+            <button type="submit">Ajouter</button>
+        </form>
+
+        <a href="liste.html"><button>Voir la liste des tickets</button></a>
+    </div>
+
+    <script>
+        document.getElementById("ticketForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const ticket = {
+                title: document.getElementById("title").value,
+                description: document.getElementById("description").value,
+                requester: document.getElementById("requester").value,
+                priority: document.getElementById("priority").value
+            };
+            await fetch("/api/ajouterTicket", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(ticket)
+            });
+            alert("Ticket ajouté !");
+            e.target.reset();
+        });
+    </script>
+</body>
+
+</html>

@@ -44,7 +44,7 @@ router.delete("/DeleteTickets/:id", (req, res) => {
 });
 
 // Modifier statut
-router.put("/tickets/:id", (req, res) => {
+router.put("/Modifiertickets/:id", (req, res) => {
     const ticket = modifierStatut(req.params.id, req.body.statut);
     if (ticket) res.json(ticket);
     else res.status(404).json({ message: "Ticket non trouvé" });

@@ -32,7 +32,7 @@ function modifierStatut(id, statut) {
     }
     return null;
 }
-
+let ticketIdToDelete = null;
 function supprimerTicket(id) {
     const data = JSON.parse(fs.readFileSync(dbPath));
     const index = data.tickets.findIndex(t => t.id == id);

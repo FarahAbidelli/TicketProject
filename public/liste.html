@@ -1,33 +1,42 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 
 <head>
     <meta charset="UTF-8">
-    <title>HelpDesk Lite - Liste Tickets</title>
+    <title>HelpDesk Lite – Liste des tickets</title>
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-    <header>
-        <h1>Liste des tickets</h1>
-    </header>
 
-    <div class="container">
-        <input type="text" id="search" placeholder="Rechercher par titre ou description">
-        <select id="filterStatus">
-            <option value="">Filtrer par statut</option>
-            <option value="ouvert">Ouvert</option>
-            <option value="en cours">En cours</option>
-            <option value="fermé">Fermé</option>
-        </select>
-        <select id="filterPriority">
-            <option value="">Filtrer par priorité</option>
-            <option value="haute">Haute</option>
-            <option value="moyenne">Moyenne</option>
-            <option value="basse">Basse</option>
-        </select>
+    <div class="background-image"></div>
 
-        <table>
+    <div class="form-container large">
+        <h2>📋 Liste des tickets</h2>
+
+        <div id="message" class="hidden"></div>
+
+        <div class="filters">
+            <input type="text" id="search" placeholder="🔍 Rechercher par titre ou description...">
+
+            <select id="filterStatus">
+                <option value="">Filtrer par statut</option>
+                <option value="ouvert">Ouvert</option>
+                <option value="en cours">En cours</option>
+                <option value="fermé">Fermé</option>
+            </select>
+
+            <select id="filterPriority">
+                <option value="">Filtrer par priorité</option>
+                <option value="haute">Haute</option>
+                <option value="moyenne">Moyenne</option>
+                <option value="basse">Basse</option>
+            </select>
+
+            <a href="index.html" class="add-btn">➕ Ajouter un ticket</a>
+        </div>
+
+        <table class="ticket-table">
             <thead>
                 <tr>
                     <th>Titre</th>
@@ -44,6 +53,7 @@
 
     <script>
         const table = document.getElementById("ticketTable");
+        const messageBox = document.getElementById("message");
 
         async function loadTickets() {
             const res = await fetch("/api/tickets");
@@ -61,38 +71,50 @@
             );
 
             table.innerHTML = "";
+
             tickets.forEach(t => {
                 const tr = document.createElement("tr");
                 tr.innerHTML = `
-            <td>${t.title}</td>
-            <td>${t.description}</td>
-            <td>${t.requester}</td>
-            <td>${t.priority}</td>
-            <td>
-                <select onchange="updateStatus(${t.id}, this.value)">
-                    <option value="ouvert" ${t.statut === "ouvert" ? "selected" : ""}>Ouvert</option>
-                    <option value="en cours" ${t.statut === "en cours" ? "selected" : ""}>En cours</option>
-                    <option value="fermé" ${t.statut === "fermé" ? "selected" : ""}>Fermé</option>
-                </select>
-            </td>
-            <td><button onclick="deleteTicket(${t.id})">Supprimer</button></td>
+          <td>${t.title}</td>
+          <td>${t.description}</td>
+          <td>${t.requester}</td>
+          <td>${t.priority}</td>
+          <td>
+            <select onchange="updateStatus(${t.id}, this.value)">
+              <option value="ouvert" ${t.statut === "ouvert" ? "selected" : ""}>Ouvert</option>
+              <option value="en cours" ${t.statut === "en cours" ? "selected" : ""}>En cours</option>
+              <option value="fermé" ${t.statut === "fermé" ? "selected" : ""}>Fermé</option>
+            </select>
+          </td>
+          <td>
+            <button class="delete-btn" onclick="deleteTicket(${t.id})">🗑 Supprimer</button>
+          </td>
         `;
                 table.appendChild(tr);
             });
         }
 
         async function updateStatus(id, statut) {
-            await fetch(`/api/tickets/${id}`, {
+            const res = await fetch(`/api/tickets/${id}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ statut })
             });
+
+            if (res.ok) {
+                messageBox.textContent = "✅ Statut mis à jour avec succès !";
+                messageBox.className = "message success";
+                setTimeout(() => messageBox.className = "hidden", 2500);
+            }
             loadTickets();
         }
 
         async function deleteTicket(id) {
             if (!confirm("Voulez-vous vraiment supprimer ce ticket ?")) return;
             await fetch(`/api/DeleteTickets/${id}`, { method: "DELETE" });
+            messageBox.textContent = "🗑 Ticket supprimé avec succès !";
+            messageBox.className = "message success";
+            setTimeout(() => messageBox.className = "hidden", 2500);
             loadTickets();
         }
 
@@ -102,6 +124,7 @@
 
         loadTickets();
     </script>
+
 </body>
 
 </html>

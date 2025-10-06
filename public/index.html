@@ -1,52 +1,89 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 
 <head>
     <meta charset="UTF-8">
-    <title>HelpDesk Lite - Ajouter Ticket</title>
+    <title>HelpDesk Lite – Nouveau Ticket</title>
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-    <header>
-        <h1>HelpDesk Lite - Créer un ticket</h1>
-    </header>
 
-    <div class="container">
-        <form id="ticketForm">
-            <input type="text" id="title" placeholder="Titre" required>
-            <input type="text" id="description" placeholder="Description" required>
-            <input type="text" id="requester" placeholder="Demandeur" required>
-            <select id="priority" required>
-                <option value="">Priorité</option>
-                <option value="haute">Haute</option>
-                <option value="moyenne">Moyenne</option>
-                <option value="basse">Basse</option>
-            </select>
-            <button type="submit">Ajouter</button>
+    <div class="background-image"></div>
+
+    <div class="form-container">
+        <form id="ticketForm" class="ticket-form">
+            <h2>Créer un nouveau ticket</h2>
+
+            <div id="message" class="hidden"></div>
+
+            <div class="form-group">
+                <label for="title">Titre du ticket</label>
+                <input type="text" id="title" placeholder="Ex : Problème Wi-Fi" required>
+            </div>
+
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea id="description" placeholder="Décrivez le problème rencontré..." required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="requester">Demandeur</label>
+                <input type="text" id="requester" placeholder="Ex : Farah Abidelli" required>
+            </div>
+
+            <div class="form-group">
+                <label for="priority">Priorité</label>
+                <select id="priority" required>
+                    <option value="">-- Sélectionner la priorité --</option>
+                    <option value="haute">Haute</option>
+                    <option value="moyenne">Moyenne</option>
+                    <option value="basse">Basse</option>
+                </select>
+            </div>
+
+            <button type="submit" class="submit-btn">➕ Ajouter le ticket</button>
+            <a href="liste.html" class="list-btn">📋 Voir la liste des tickets</a>
         </form>
-
-        <a href="liste.html"><button>Voir la liste des tickets</button></a>
     </div>
 
     <script>
         document.getElementById("ticketForm").addEventListener("submit", async (e) => {
             e.preventDefault();
+
+            const messageBox = document.getElementById("message");
+            messageBox.classList.add("hidden");
+
             const ticket = {
                 title: document.getElementById("title").value,
                 description: document.getElementById("description").value,
                 requester: document.getElementById("requester").value,
-                priority: document.getElementById("priority").value
+                priority: document.getElementById("priority").value,
+                statut: "ouvert"
             };
-            await fetch("/api/ajouterTicket", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(ticket)
-            });
-            alert("Ticket ajouté !");
-            e.target.reset();
+
+            try {
+                const response = await fetch("/api/ajouterTicket", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(ticket)
+                });
+
+                if (response.ok) {
+                    messageBox.textContent = "✅ Ticket ajouté avec succès !";
+                    messageBox.className = "message success";
+                    e.target.reset();
+                } else {
+                    messageBox.textContent = "❌ Erreur lors de l’ajout du ticket.";
+                    messageBox.className = "message error";
+                }
+            } catch (err) {
+                messageBox.textContent = "⚠️ Erreur de connexion au serveur.";
+                messageBox.className = "message error";
+            }
         });
     </script>
+
 </body>
 
 </html>

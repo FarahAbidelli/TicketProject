@@ -1,0 +1,305 @@
+{
+	"info": {
+		"_postman_id": "6096946f-c737-44d6-bdb0-0199f275c3d0",
+		"name": "Tickets",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "48877654",
+		"_collection_link": "https://abfarah222-3134499.postman.co/workspace/farah-abdelli's-Workspace~adc7a959-12b0-41fb-8678-88ec311dd866/collection/48877654-6096946f-c737-44d6-bdb0-0199f275c3d0?action=share&source=collection_link&creator=48877654"
+	},
+	"item": [
+		{
+			"name": "DeleteTicket",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Statut de réponse est 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Le ticket est supprimé\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.message).to.eql(\"Ticket supprimé\");\r",
+							"});\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"let ids = JSON.parse(pm.environment.get(\"id_tickets\") || \"[]\");\r",
+							"pm.environment.set(\"id_ticket\", ids.pop()); // Supprime le dernier ID utilisé\r",
+							"pm.environment.set(\"id_tickets\", JSON.stringify(ids));\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{BaseURL}}/api/DeleteTickets/{{id_ticket}}",
+					"host": [
+						"{{BaseURL}}"
+					],
+					"path": [
+						"api",
+						"DeleteTickets",
+						"{{id_ticket}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "AjoutTicket",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Récupérer le body envoyé\r",
+							"let requestBody = JSON.parse(pm.request.body.raw);\r",
+							"\r",
+							"//\r",
+							"let jsonData = pm.response.json();\r",
+							"\r",
+							"// Récupérer la variable id_tickets depuis l’environnement\r",
+							"let tickets = pm.environment.get(\"id_tickets\");\r",
+							"\r",
+							"// Si c’est une chaîne JSON, la convertir en tableau\r",
+							"tickets = tickets ? JSON.parse(tickets) : [];\r",
+							"\r",
+							"// Ajouter le nouvel id\r",
+							"tickets.push(jsonData.id);\r",
+							"\r",
+							"// Sauvegarder à nouveau dans la variable environnement\r",
+							"pm.environment.set(\"id_tickets\", JSON.stringify(tickets));\r",
+							"//\r",
+							"\r",
+							"// Vérifier que la réponse a le statut 201 (Créé)\r",
+							"pm.test(\"Statut de réponse est 201\", function () {\r",
+							"    pm.response.to.have.status(201);\r",
+							"});\r",
+							"\r",
+							"// Vérifier que le titre renvoyé correspond à celui envoyé\r",
+							"pm.test(\"Le ticket a le bon titre\", function () {\r",
+							"    let jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.title).to.eql(requestBody.title);\r",
+							"});\r",
+							"\r",
+							"// Vérifier que le statut par défaut est \"ouvert\"\r",
+							"pm.test(\"Le statut par défaut est ouvert\", function () {\r",
+							"    let jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.statut).to.eql(\"ouvert\");\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"packages": {},
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"title\": \"Problème CUISINE\",\r\n  \"description\": \"Wifi ne fonctionne pas\",\r\n  \"requester\": \"Farahzzzz\",\r\n  \"priority\": \"haute\",\r\n  \"statut\": \"ouvert\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{BaseURL}}/api/ajouterTicket",
+					"host": [
+						"{{BaseURL}}"
+					],
+					"path": [
+						"api",
+						"ajouterTicket"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "UpDateStatusTicket",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Statut de réponse est 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Le ticket est modifié avec le bon statut\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    var statutAttendu = pm.request.body.raw ? JSON.parse(pm.request.body.raw).statut : null;\r",
+							"    pm.expect(jsonData.statut).to.eql(statutAttendu);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"let tickets = JSON.parse(pm.environment.get(\"id_tickets\") || \"[]\");\r",
+							"if (tickets.length > 0) {\r",
+							"    pm.environment.set(\"id_ticket\", tickets[0]); // Change [0] pour choisir un autre ticket\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"statut\": \"ouvert\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{BaseURL}}/api/tickets/{{id_ticket}}",
+					"host": [
+						"{{BaseURL}}"
+					],
+					"path": [
+						"api",
+						"tickets",
+						"{{id_ticket}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetAllTickets",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let jsonData = pm.response.json();\r",
+							"let ids = jsonData.map(ticket => ticket.id);\r",
+							"pm.environment.set(\"id_tickets\", JSON.stringify(ids));\r",
+							"\r",
+							"\r",
+							"pm.test(\"Statut de réponse est 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"La réponse contient un ticket\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData).to.be.an(\"array\");\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{BaseURL}}/api/tickets",
+					"host": [
+						"{{BaseURL}}"
+					],
+					"path": [
+						"api",
+						"tickets"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "BaseURL",
+			"value": "http://localhost:3002"
+		},
+		{
+			"key": "id_ticket",
+			"value": ""
+		},
+		{
+			"key": "id_tickets",
+			"value": ""
+		}
+	]
+}

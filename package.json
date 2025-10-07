@@ -16,6 +16,9 @@
   "directories": {
     "test": "tests"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "cypress": "^15.3.0",
+    "newman": "^6.2.1"
+  },
   "description": ""
 }

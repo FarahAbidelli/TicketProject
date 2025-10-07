@@ -1,22 +1,19 @@
-//function ajouterTicket(){
-//    return "ticket ajouté"
-//}
-//module.exports = {ajouterTicket}
-
 const fs = require("fs");
 const path = require("path");
 
 const dbPath = path.join(__dirname, "../db.json");
+
 
 function lireTickets() {
     const data = fs.readFileSync(dbPath);
     return JSON.parse(data).tickets;
 }
 
+// statut par défaut ouvert
 function ajouterTicket(ticket) {
     const data = JSON.parse(fs.readFileSync(dbPath));
     ticket.id = Date.now();
-    ticket.statut = "ouvert"; // statut par défaut
+    ticket.statut = "ouvert"; 
     data.tickets.push(ticket);
     fs.writeFileSync(dbPath, JSON.stringify(data, null, 2));
     return ticket;
